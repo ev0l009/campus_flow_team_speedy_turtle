@@ -32,22 +32,21 @@ The goal of CampusFlow is to provide a simple and organized way to manage campus
 1. Clone the repository:
 
    ```bash
-   git clone <repository-url>
+   git clone <https://github.com/ev0l009/campus_flow_team_speedy_turtle.git>
    ```
 
 2. Navigate into the project directory:
 
    ```bash
-   cd <project-directory>
+   cd <campus_flow_team_speedy_turtle>
    ```
 
 3. Run the application using its entry-point script.
 
    ```bash
-   python main.py
+   python3 main.py
    ```
 
-   Replace `main.py` with the appropriate entry-point filename if necessary.
 
 ## 🤝 Collaboration
 
