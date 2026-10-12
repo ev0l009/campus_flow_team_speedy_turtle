@@ -69,15 +69,22 @@ def campus_flow_runner():
             opt = "0"
 
         elif opt == "4":
-            ticket_id = input(f"  {CYAN}Enter your ticket ID{RESET}    : ")
+            print(f"\n{CYAN}--- ASSIGN STAFF ---{RESET}")
+            ticket_id = input(f"  {CYAN}Enter ticket ID{RESET}    : ")
+            staff_name = input(f"  {CYAN}Enter staff name{RESET} : ")
 
-            staff_name = input(f"  {CYAN}Enter your ticket ID{RESET}    : ")
+            try:
+                campus_flow.assign_ticket(
+                    ticket_id,
+                    staff_name
+                )
+            except InvalidAttributeError as err:
+                print(err)
+            except InvalidTicketIDError as err:
+                print(err)
+            else:
+                print(f"\n  {GREEN}✔ Ticket with ID: {ticket_id} successfully assigned to {staff_name}!{RESET}\n")
 
-            campus_flow.assign_ticket(
-                ticket_id,
-                staff_name
-            )
-# tkt_KPj69
             opt = "0"
 
         elif opt == "5":
@@ -95,6 +102,8 @@ def campus_flow_runner():
 
             opt = "0"
 
-    print("Exiting")
+    print("")
+
+    print(f"\n{GREEN}Exiting{RESET}")
 
 campus_flow_runner()

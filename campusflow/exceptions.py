@@ -6,3 +6,6 @@ class InvalidAttributeError(CampusFlowException):
 
 class InvalidTicketIDError(CampusFlowException):
     pass
+
+class DatabaseError(CampusFlowException):
+    pass

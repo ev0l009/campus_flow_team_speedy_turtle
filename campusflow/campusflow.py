@@ -10,6 +10,7 @@ from utils.validators import validate_value
 from utils.validators import check_affected_users
 
 from campusflow.exceptions import InvalidTicketIDError
+from campusflow.exceptions import DatabaseError
 
 from collections import Counter
 
@@ -90,9 +91,10 @@ class CampusFlow:
 
     def assign_ticket(self, ticket_id: str, staff_name: str) -> None:
         require_non_empty(staff_name, "Staff name")
+        require_non_empty(ticket_id, "Ticket ID")
 
         if ticket_id not in self.data["tickets"]:
-            raise ValueError(f"Ticket '{ticket_id}' does not exist.")
+            raise InvalidTicketIDError(f"Ticket '{ticket_id}' does not exist.")
 
         self.data["tickets"][ticket_id]["assigned_to"] = staff_name
     
@@ -228,22 +230,38 @@ class CampusFlow:
         )
 
     def save(self) -> None:
-        serialized_data: CampusFlowDict = {
-            "tickets": {},
-            "staff": {}
-        }
+        try:
+            serialized_data: CampusFlowDict = {
+                "tickets": {},
+                "staff": {}
+            }
 
-        for id, ticket in self.data.get("tickets", {}).items():
-            serialized_data["tickets"][id] = ticket.__dict__
+            # 1. Fail-safe: Use safe get() fallback and ensure object attribute safety
+            for id, ticket in self.data.get("tickets", {}).items():
+                serialized_data["tickets"][id] = getattr(ticket, "__dict__", ticket)
 
-        for id, staff in self.data.get("staff", {}).items():
-            serialized_data["staff"][id] = staff.__dict__
+            for id, staff in self.data.get("staff", {}).items():
+                serialized_data["staff"][id] = getattr(staff, "__dict__", staff)
 
-        #  Dynamically grab the parent folder of the file path
-        DB_FILE_PATH.parent.mkdir(parents=True, exist_ok=True)
+            # Ensure parent folder exists
+            DB_FILE_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(DB_FILE_PATH, 'w') as file:
-            json.dump(serialized_data, file, indent=4)
+            # 2. Fail-safe: Atomic write using a temporary file to prevent file corruption
+            temp_file_path = DB_FILE_PATH.with_suffix(".tmp")
+            
+            with open(temp_file_path, 'w', encoding='utf-8') as file:
+                json.dump(serialized_data, file, indent=4)
+            
+            # Atomically replace the old database file with the newly written one
+            os.replace(temp_file_path, DB_FILE_PATH)
+            print("Database successfully saved.")
+
+        # 3. Fail-safe: Catch disk space, locked file, or system issues
+        except (PermissionError, IOError) as e:
+            raise DatabaseError(f"Failed to write database file.")
+
+        except Exception as e:
+            raise DatabaseError(f"An unexpected serialization error occurred during save: {e}")
 
     def load(self) -> None:
         if not os.path.exists(DB_FILE_PATH):
