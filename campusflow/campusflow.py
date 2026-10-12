@@ -132,10 +132,10 @@ class CampusFlow:
         )
 
     def update_ticket_status(
-    self,
-    ticket_id: str,
-    new_status: TicketStatus
-) -> None:
+        self,
+        ticket_id: str,
+        new_status: TicketStatus
+    ) -> None:
         if ticket_id not in self.data["tickets"]:
             raise InvalidTicketIDError("No ticket with this ID exists.")
 
@@ -143,26 +143,28 @@ class CampusFlow:
         current_status = ticket["status"]
 
         if current_status == TicketStatus.RESOLVED.value:
+            # A resolved ticket can ONLY transition to OPEN
             if new_status != TicketStatus.OPEN:
                 raise ValueError(
                     "Resolved tickets must be reopened before further changes."
                 )
 
         elif current_status == TicketStatus.OPEN.value:
+            # Open tickets can transition to IN_PROGRESS (if assigned) or stay OPEN
             if new_status == TicketStatus.IN_PROGRESS:
                 if not ticket["assigned_to"]:
                     raise ValueError(
                         "An unassigned ticket cannot be moved into progress."
                     )
-
             elif new_status != TicketStatus.OPEN:
-                if new_status != TicketStatus.IN_PROGRESS:
-                    raise ValueError(
-                        f"Invalid transition: {current_status} → {new_status.value}."
-                    )
+                # If it's not staying OPEN and it's not IN_PROGRESS, it's an invalid jump straight to RESOLVED
+                raise ValueError(
+                    f"Invalid transition: {current_status} → {new_status.value}."
+                )
 
         elif current_status == TicketStatus.IN_PROGRESS.value:
-            if new_status != TicketStatus.RESOLVED:
+            # In-progress tickets can ONLY transition to RESOLVED (or stay IN_PROGRESS)
+            if new_status != TicketStatus.RESOLVED and new_status.value != current_status:
                 raise ValueError(
                     f"Invalid transition: {current_status} → {new_status.value}."
                 )
