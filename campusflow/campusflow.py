@@ -1,6 +1,8 @@
 from pathlib import Path
 import json
 
+import os
+
 from utils.helpers import generate_prefixed_id
 
 from utils.validators import require_non_empty
@@ -18,6 +20,7 @@ DB_FILE_PATH = DB_DIR / "tickets.json"
 
 
 class CampusFlow:
+    
     PRIORITY_ORDER = {
         "critical": 0,
         "high": 1,
@@ -37,7 +40,7 @@ class CampusFlow:
         title: str, 
         category: str, 
         urgency: str, 
-        affected_users: int
+        affected_users: str
     ):
         require_non_empty(title, "Title")
         validate_value(category, Categories, "Category")
@@ -51,7 +54,7 @@ class CampusFlow:
             "title": title,
             "category": category,
             "urgency": urgency,
-            "affected_users": affected_users,
+            "affected_users": int(affected_users),
             "priority": self.calculate_priority(int(affected_users), urgency),
             "status": TicketStatus.OPEN.value,
             "assigned_to": None   
@@ -243,5 +246,35 @@ class CampusFlow:
             json.dump(serialized_data, file, indent=4)
 
     def load(self) -> None:
-        with open(DB_FILE_PATH, 'r') as file:        
-            self.data = json.load(file)
+        if not os.path.exists(DB_FILE_PATH):
+            print(f"Database file not found. Initializing empty data.")
+            self.data = {
+            "tickets": {},
+            "staff": {}
+        }
+            return
+
+        try:
+            with open(DB_FILE_PATH, 'r', encoding='utf-8') as file:        
+                self.data = json.load(file)
+                
+        except json.JSONDecodeError:
+            print(f"Database file is corrupted or empty. Fallback to empty data.")
+            self.data = {
+            "tickets": {},
+            "staff": {}
+        }
+            
+        except PermissionError:
+            print(f"Permission denied when trying to read database file.")
+            self.data = {
+            "tickets": {},
+            "staff": {}
+        }
+            
+        except Exception as e:
+            print(f"Unexpected error loading database: {e}")
+            self.data = {
+            "tickets": {},
+            "staff": {}
+        }

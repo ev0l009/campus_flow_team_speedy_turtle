@@ -36,7 +36,12 @@ def campus_flow_runner():
                 urgency = get_urgency()
                 users_affected = input(f"  {CYAN}👥 Users Affected{RESET}    : ")
 
-                campus_flow.create_ticket(title, category, urgency, users_affected)
+                campus_flow.create_ticket(
+                    title, 
+                    category, 
+                    urgency, 
+                    users_affected
+                )
                 
             except InvalidAttributeError as err:
                 print(f"\n  {GRAY}[Error]{RESET} {err}")
