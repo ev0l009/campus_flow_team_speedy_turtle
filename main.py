@@ -9,6 +9,7 @@ from utils.helpers import get_category
 from utils.helpers import get_urgency
 
 from campusflow.exceptions import InvalidTicketIDError
+from campusflow.exceptions import DatabaseError
 
 campus_flow = CampusFlow()
 
@@ -102,7 +103,12 @@ def campus_flow_runner():
 
             opt = "0"
 
-    print("")
+    try:
+        campus_flow.save()
+    except DatabaseError as err:
+        print(err)
+    else:
+        print(f"\n  {GREEN}✔ Session saved{RESET}\n")
 
     print(f"\n{GREEN}Exiting{RESET}")
 
