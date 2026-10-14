@@ -5,8 +5,7 @@ from campusflow.exceptions import InvalidAttributeError
 from campusflow.ui import display_menu
 from campusflow.ui import display_ticket_creation_menu
 
-from utils.helpers import get_category
-from utils.helpers import get_urgency
+from campusflow.ui import category_menu, urgency_menu
 
 from campusflow.exceptions import InvalidTicketIDError
 from campusflow.exceptions import DatabaseError
@@ -33,11 +32,11 @@ def campus_flow_runner():
 
             try:
                 title = input(f"  {CYAN}📝 Ticket Title{RESET}       : ")
-                category = get_category()
-                urgency = get_urgency()
+                category = input(category_menu)
+                urgency = input(urgency_menu)
                 users_affected = input(f"  {CYAN}👥 Users Affected{RESET}    : ")
 
-                campus_flow.create_ticket(
+                ticket_id = campus_flow.create_ticket(
                     title, 
                     category, 
                     urgency, 
@@ -47,7 +46,7 @@ def campus_flow_runner():
             except InvalidAttributeError as err:
                 print(f"\n  {GRAY}[Error]{RESET} {err}")
             else:
-                print(f"\n  {GREEN}✔ Ticket created successfully!{RESET}\n")
+                print(f"\n  {GREEN}✔ Ticket with ID: {ticket_id} created successfully!{RESET}\n")
 
             opt = "0"
 

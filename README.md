@@ -53,3 +53,13 @@ The goal of CampusFlow is to provide a simple and organized way to manage campus
 This project is developed collaboratively using Git and GitHub.
 
 Each developer can work on a separate branch, test their changes, and submit changes for integration into the main branch.
+
+FUTURE IMPLEMENTATIONS:
+- Auth for staff and fellows
+- Only staff can create and update tickets
+- Fellows can only view tickets, list tickets, view work queue
+
+Extras:
+- Fellows can log complaints
+- Staff can correlate logged complaints into tickets
+- Staff can leave comments

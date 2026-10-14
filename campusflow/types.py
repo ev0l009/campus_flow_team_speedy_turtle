@@ -26,7 +26,3 @@ class TicketDictType(TypedDict):
     priority: str
     status: str
     assigned_to: str | None
-
-class CampusFlowDict(TypedDict):
-    tickets: dict[str, TicketDictType]
-    staff: dict[str, str]
