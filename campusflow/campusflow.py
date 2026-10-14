@@ -77,7 +77,10 @@ class CampusFlow:
         tickets_str = ""
         for idx, ticket in enumerate(self.tickets.values()):
             tickets_str += (
-                f"{idx+1}  {ticket["id"]}  {ticket["title"]}\n"
+                f"{idx+1}  "
+                f"{ticket["id"]}  "
+                f"{ticket["title"]} " 
+                f"{ticket['priority']}\n"
             )
         return (
             "      Tickets List\n"
@@ -92,7 +95,9 @@ class CampusFlow:
         if ticket_id not in self.tickets:
             raise InvalidTicketIDError(f"Ticket '{ticket_id}' does not exist.")
 
-        self.tickets[ticket_id]["assigned_to"] = staff_name
+        ticket = self.tickets[ticket_id]
+        ticket["assigned_to"] = staff_name
+        ticket["status"] = TicketStatus.IN_PROGRESS.value
     
     def work_queue(self) -> str:
         tickets = self.tickets.values()
@@ -100,7 +105,7 @@ class CampusFlow:
         open_tickets = [
             ticket
             for ticket in tickets
-            if ticket["status"].lower() == "open"
+            if ticket["status"] != TicketStatus.RESOLVED.value
         ]
 
         if not open_tickets:
@@ -190,7 +195,7 @@ class CampusFlow:
 
             temp_file_path = DB_FILE_PATH.with_suffix(".tmp")
             
-            with open(temp_file_path, 'w', encoding='utf-8') as file:
+            with open(temp_file_path, 'w') as file:
                 json.dump(self.tickets, file, indent=4)
             
             os.replace(temp_file_path, DB_FILE_PATH)
@@ -208,8 +213,8 @@ class CampusFlow:
             return
 
         try:
-            with open(DB_FILE_PATH, 'r', encoding='utf-8') as file:        
-                self.data = json.load(file)
+            with open(DB_FILE_PATH, 'r') as file:        
+                self.tickets = json.load(file)
                 
         except json.JSONDecodeError:
             print(f"Database file is corrupted or empty. Fallback to empty data.")
